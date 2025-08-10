@@ -71,7 +71,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             successRes.WriteByte(0);
             successRes.WriteByte(0);
             successRes.WriteByte(0);
-            successRes.WriteCString("Test2");
+            successRes.WriteCString("keyboard");
             successRes.WriteByte(255);
             successRes.WriteByte(255);
             successRes.WriteByte(255);
