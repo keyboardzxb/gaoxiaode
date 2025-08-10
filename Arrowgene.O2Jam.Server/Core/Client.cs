@@ -1,0 +1,96 @@
+using System;
+using System.Collections.Generic;
+using Arrowgene.O2Jam.Server.Logging;
+using Arrowgene.O2Jam.Server.Packet;
+using Arrowgene.Logging;
+using Arrowgene.Networking.Tcp;
+
+namespace Arrowgene.O2Jam.Server.Core
+{
+    
+    public class Client
+    {
+        private static readonly ServerLogger Logger = LogProvider.Logger<ServerLogger>(typeof(Client));
+
+        private readonly ITcpSocket _socket;
+        private readonly PacketFactory _packetFactory;
+
+        public Account Account { get; set; }
+        public Character Character { get; set; }
+        public int CurrentRoomId { get; set; } = -1; // -1 表示不在任何房间内
+        public ushort CurrentChannelId { get; set; }
+        public Client(ITcpSocket clientSocket)
+        {
+            _socket = clientSocket;
+            _packetFactory = new PacketFactory(this);
+            Identity = _socket.Identity;
+        }
+
+        public string Identity { get; }
+
+        public List<NetPacket> Receive(byte[] data)
+        {
+            List<NetPacket> packets;
+            try
+            {
+                packets = _packetFactory.Read(data);
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(this, ex);
+                packets = new List<NetPacket>();
+            }
+
+            return packets;
+        }
+
+        public void Send(byte[] data, PacketId packetId)
+        {
+            NetPacket packet = new NetPacket(packetId, data, PacketSource.Server);
+            Send(packet);
+        }
+
+        public void Send(PacketId packetId)
+        {
+            Send(null, packetId);
+        }
+
+        public void Send(byte[] data)
+        {
+            if (data == null)
+            {
+                Logger.Error(this, "data == null");
+                return;
+            }
+
+            _socket.Send(data);
+        }
+
+        public void Send(NetPacket packet)
+        {
+            byte[] data;
+            try
+            {
+                data = _packetFactory.Write(packet);
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(this, ex);
+                return;
+            }
+
+            if (data == null)
+            {
+                Logger.Error(this, $"No data produced to send for packetId: {packet.Id}");
+                return;
+            }
+
+            _socket.Send(data);
+        }
+
+        public void Close()
+        {
+            _socket.Close();
+        }
+    }
+}
