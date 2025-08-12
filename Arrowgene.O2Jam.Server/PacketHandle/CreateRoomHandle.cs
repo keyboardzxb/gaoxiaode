@@ -1,4 +1,4 @@
-﻿// 文件路径: Arrowgene.O2Jam.Server/PacketHandle/CreateRoomHandle.cs
+﻿// Arrowgene.O2Jam.Server/PacketHandle/CreateRoomHandle.cs
 using Arrowgene.Buffers;
 using Arrowgene.Logging;
 using Arrowgene.O2Jam.Server.Core;
@@ -12,7 +12,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
     public class CreateRoomHandle : PacketHandler
     {
         private static readonly ServerLogger Logger = LogProvider.Logger<ServerLogger>(typeof(CreateRoomHandle));
-        private static readonly Encoding KoreanEncoding = Encoding.GetEncoding("EUC-KR", new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
+        private static readonly Encoding KoreanEncoding = Encoding.GetEncoding("EUC-KR", new EncoderReplacementFallback("?"), new DecoderReplacementFallback("?"));
 
         public override PacketId Id => PacketId.CreateRoomReq;
 
@@ -21,8 +21,20 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             IBuffer req = new StreamBuffer(packet.Data);
             string roomName = req.ReadCString(KoreanEncoding);
 
+            // 【健壮性修正】如果读取的房间名是空的，就生成一个默认名字
+            if (string.IsNullOrWhiteSpace(roomName))
+            {
+                roomName = $"{client.Character.Name}'s Room";
+                Logger.Debug($"Received empty room name from client. Defaulting to '{roomName}'.");
+            }
+
             var newRoom = Lobby.CreateRoom(roomName, client);
-            client.CurrentRoomId = newRoom.Id;
+
+            if (newRoom == null)
+            {
+                Logger.Error($"Player '{client.Character.Name}' failed to create a room.");
+                return;
+            }
 
             Logger.Info($"Player '{client.Character.Name}' created Room {newRoom.Id} ('{newRoom.Name}').");
 
@@ -32,7 +44,6 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteInt16(0);
             client.Send(res.GetAllBytes(), PacketId.CreateRoomRes);
 
-            // (修复) 调用正确的方法
             RoomListHandle.BroadcastNewRoom(newRoom, client);
         }
     }
