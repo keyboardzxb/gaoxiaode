@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = Arrowgene.O2Jam.Server
+build_property.ProjectDir = E:\O2JAMzaisheng\Arrowgene.O2Jam-develop\Arrowgene.O2Jam.Server\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
