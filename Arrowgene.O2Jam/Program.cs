@@ -28,9 +28,6 @@ namespace Arrowgene.O2Jam
             LogProvider.OnLogWrite += LogProviderOnOnLogWrite;
             LogProvider.Start();
 
-            try { DatabaseManager.Initialize(); Logger.Info("Database initialized successfully."); }
-            catch (Exception ex) { Logger.Error($"FATAL: Database init failed: {ex.Message}"); Console.ReadKey(); return; }
-
             // --- 您的HttpRegistrationServer保持不变，它可能用于网页注册等 ---
             try { new HttpRegistrationServer().Start(); }
             catch (Exception ex) { Logger.Error($"FATAL: HTTP Registration Server start failed: {ex.Message}"); Console.ReadKey(); return; }
