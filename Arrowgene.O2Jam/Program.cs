@@ -28,10 +28,6 @@ namespace Arrowgene.O2Jam
             LogProvider.OnLogWrite += LogProviderOnOnLogWrite;
             LogProvider.Start();
 
-            // --- 您的HttpRegistrationServer保持不变，它可能用于网页注册等 ---
-            try { new HttpRegistrationServer().Start(); }
-            catch (Exception ex) { Logger.Error($"FATAL: HTTP Registration Server start failed: {ex.Message}"); Console.ReadKey(); return; }
-
             // 【第二处修改】在这里启动我们专门用于处理游戏内请求的HTTP服务器
             try
             {
