@@ -44,7 +44,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteInt16(0);
             client.Send(res.GetAllBytes(), PacketId.CreateRoomRes);
 
-            RoomListHandle.BroadcastNewRoom(newRoom, client);
+           // RoomListHandle.BroadcastNewRoom(newRoom, client);
         }
     }
 }

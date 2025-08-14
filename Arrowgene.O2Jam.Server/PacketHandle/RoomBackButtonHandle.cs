@@ -19,47 +19,54 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             int roomId = client.CurrentRoomId;
             if (roomId == -1)
             {
-                Logger.Debug($"Player '{client.Character.Name}' tried to leave a room, but they are already in the lobby.");
+                Logger.Debug($"Player '{client.Character.Name}' is already in the lobby.");
+                // 即使已经在Lobby，也可能需要一个响应来防止客户端卡住
+                client.Send(new StreamBuffer().GetAllBytes(), PacketId.RoomBackButtonRes);
                 return;
             }
 
-            // 现在 Lobby.GetRoom(roomId) 可以被正确调用
-            Room room = Lobby.GetRoom(roomId);
+            Arrowgene.O2Jam.Server.State.Room room = Lobby.GetRoom(roomId);
             if (room == null)
             {
-                Logger.Error($"Player '{client.Character.Name}' tried to leave Room {roomId}, but the room does not exist. Forcing state reset.");
-                client.CurrentRoomId = -1;
+                Logger.Error($"Player '{client.Character.Name}' tried to leave non-existent Room {roomId}. Forcing state reset.");
+                client.CurrentRoomId = -1; // 强制重置客户端状态
+                client.Send(new StreamBuffer().GetAllBytes(), PacketId.RoomBackButtonRes);
                 return;
             }
 
-            Logger.Info($"Player '{client.Character.Name}' is leaving Room {roomId}.");
+            Logger.Info($"Player '{client.Character.Name}' is leaving Room {roomId} ('{room.Name}').");
 
-            // 情况一：离开者是房主
+            // 先将当前客户端移出房间，并重置其房间ID
+            // 这是最核心的服务器状态更新
+            room.RemovePlayer(client);
+
+            // 检查离开的是否是房主
             if (room.Host == client)
             {
-                Logger.Info($"Host '{client.Character.Name}' is leaving. Room {roomId} ('{room.Name}') will be dissolved.");
+                Logger.Info($"Host '{client.Character.Name}' has left. Dissolving room {roomId}.");
 
-                var playersInRoom = room.Players.Values.ToList();
-                foreach (var playerInRoom in playersInRoom)
+                // 房主离开，需要通知房间内所有其他玩家，他们被“踢出”了
+                var otherPlayers = room.Players.Values.ToList();
+                foreach (var playerInRoom in otherPlayers)
                 {
-                    Lobby.RemovePlayerFromRoom(playerInRoom, roomId);
-                    if (playerInRoom != client)
-                    {
-                        // 您需要实现 ForceKickPlayer 方法来通知客户端被踢出
-                        // RoomListHandle.ForceKickPlayer(playerInRoom, "房主已离开，房间已解散。");
-                    }
+                    // 重置其他玩家的房间状态
+                    playerInRoom.CurrentRoomId = -1;
+
+                    // 发送一个“被踢出”的通知包给其他玩家
+                    // O2Jam通常有一个专门的包来处理这种情况，这里我们用一个通用的响应。
+                    // 您未来可以抓包分析，找到确切的“被房主踢出”的包并在这里实现。
+                    // 现在这个响应将简单地告诉客户端返回大厅。
+                    IBuffer kickPacket = new StreamBuffer();
+                    // kickPacket.WriteCString("Room closed by host."); // 根据具体协议可能需要消息
+                    playerInRoom.Send(kickPacket.GetAllBytes(), PacketId.RoomBackButtonRes); // 使用相同的返回大厅包
+                    Logger.Info($"Notifying player '{playerInRoom.Character.Name}' that room is closed.");
                 }
 
+                // 从Lobby中彻底移除这个房间
                 Lobby.RemoveRoom(roomId);
-                // 您需要实现 BroadcastRoomClosed 方法来通知大厅玩家房间关闭
-                // RoomListHandle.BroadcastRoomClosed(roomId);
-            }
-            // 情况二：离开者是普通玩家
-            else
-            {
-                Lobby.RemovePlayerFromRoom(client, roomId);
             }
 
+            // 最后，给发起离开请求的客户端发送成功的响应
             client.Send(new StreamBuffer().GetAllBytes(), PacketId.RoomBackButtonRes);
             Logger.Info($"Player '{client.Character.Name}' has successfully returned to lobby.");
         }

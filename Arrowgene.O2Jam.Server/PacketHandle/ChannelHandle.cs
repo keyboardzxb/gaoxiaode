@@ -30,7 +30,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             // (修复) 调用正确的方法
             RoomListHandle.SendUnlockPacket(client);
-            RoomListHandle.AnnounceAllRoomsTo(client);
+            //RoomListHandle.AnnounceAllRoomsTo(client);
         }
     }
 }

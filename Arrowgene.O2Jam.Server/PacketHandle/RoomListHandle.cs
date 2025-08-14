@@ -18,7 +18,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
         private static readonly Encoding KoreanEncoding = Encoding.GetEncoding("EUC-KR", new EncoderReplacementFallback(""), new DecoderReplacementFallback(""));
 
         // 【新增辅助方法】用于写入固定长度、自动用 null 补齐的字符串
-        private static void WriteFixedString(IBuffer buffer, string text, int fixedLength, Encoding encoding)
+       /* private static void WriteFixedString(IBuffer buffer, string text, int fixedLength, Encoding encoding)
         {
             byte[] bytes = encoding.GetBytes(text);
             byte[] fixedBuffer = new byte[fixedLength];
@@ -43,18 +43,18 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             WriteFixedString(buffer, room.Host.Character.Name, 16, KoreanEncoding);
             return buffer;
         }
-
+       */
         // --- 以下是您文件中原有的、无需修改的方法，保持原样即可 ---
 
         public override PacketId Id => PacketId.RoomListReq;
 
         public override void Handle(Client client, NetPacket packet)
         {
-            SendUnlockPacket(client);
-            AnnounceAllRoomsTo(client);
+           // SendUnlockPacket(client);
+          //  AnnounceAllRoomsTo(client);
         }
 
-        public static void AnnounceAllRoomsTo(Client recipient)
+       /* public static void AnnounceAllRoomsTo(Client recipient)
         {
             List<Room> rooms = Lobby.GetRooms();
             if (!rooms.Any()) return;
@@ -81,7 +81,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             {
                 client.Send(announcePacket.GetAllBytes(), PacketId.AnnounceRoomRes);
             }
-        }
+        }*/
 
         public static void BroadcastRoomClosed(int roomId)
         {

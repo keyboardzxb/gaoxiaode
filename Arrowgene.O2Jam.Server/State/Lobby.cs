@@ -1,7 +1,5 @@
 ﻿// 文件路径: Arrowgene.O2Jam.Server/State/Lobby.cs
-
 using Arrowgene.O2Jam.Server.Core;
-using Arrowgene.O2Jam.Server.PacketHandle;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +13,14 @@ namespace Arrowgene.O2Jam.Server.State
         VsMode = 2
     }
 
-    public class Room
+    // 使用 partial class 允许我们在 HttpServer.cs 中对它进行扩展
+    public partial class Room
     {
         public int Id { get; }
+
+        public string Password { get; set; }
+        public bool IsPlaying { get; set; }
+        public int SongId { get; set; }
         public string Name { get; set; }
         public RoomMode Mode { get; set; }
         public Client Host { get; }
@@ -60,18 +63,25 @@ namespace Arrowgene.O2Jam.Server.State
         public static void AddClient(Client client)
         {
             Clients.TryAdd(client.Account.Id, client);
-            client.CurrentRoomId = -1;
+            client.CurrentRoomId = -1; // 确保新加入的客户端在Lobby
         }
 
         public static void RemoveClient(Client client)
         {
             Clients.TryRemove(client.Account.Id, out _);
-            // 这里我们不再调用 RemovePlayerFromCurrentRoom，因为下线逻辑会在 Socket 断开时统一处理
+            if (client.CurrentRoomId != -1)
+            {
+                RemovePlayerFromRoom(client, client.CurrentRoomId);
+            }
         }
 
         public static Room CreateRoom(string name, Client host)
         {
-            var newRoom = new Room(name, host);
+            var newRoom = new Room(name, host)
+            {
+                // 默认创建的房间是7键模式
+                Mode = RoomMode.SevenKey
+            };
             Rooms.TryAdd(newRoom.Id, newRoom);
             return newRoom;
         }
@@ -79,7 +89,6 @@ namespace Arrowgene.O2Jam.Server.State
         public static List<Room> GetRooms() => Rooms.Values.ToList();
         public static IEnumerable<Client> GetAllClients() => Clients.Values;
 
-        // 【核心修正】恢复 GetRoom 方法，这是编译错误的原因
         public static Room GetRoom(int roomId)
         {
             Rooms.TryGetValue(roomId, out var room);
@@ -91,11 +100,13 @@ namespace Arrowgene.O2Jam.Server.State
             if (Rooms.TryGetValue(roomId, out var room))
             {
                 room.RemovePlayer(player);
+                // 如果房间空了，或者房主走了，就移除房间
+                if (room.Players.IsEmpty || room.Host == player)
+                {
+                    RemoveRoom(roomId);
+                }
             }
-            else
-            {
-                player.CurrentRoomId = -1;
-            }
+            player.CurrentRoomId = -1;
         }
 
         public static void RemoveRoom(int roomId)

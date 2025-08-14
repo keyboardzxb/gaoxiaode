@@ -4,6 +4,7 @@ using Arrowgene.O2Jam.Server.Logging;
 using Arrowgene.O2Jam.Server.Packet;
 using Arrowgene.Logging;
 using Arrowgene.Networking.Tcp;
+using Arrowgene.O2Jam.Server.State;
 
 namespace Arrowgene.O2Jam.Server.Core
 {
@@ -17,6 +18,7 @@ namespace Arrowgene.O2Jam.Server.Core
 
         public Account Account { get; set; }
         public Character Character { get; set; }
+        public Channel Channel { get; set; }
         public int CurrentRoomId { get; set; } = -1; // -1 表示不在任何房间内
         public ushort CurrentChannelId { get; set; }
         public Client(ITcpSocket clientSocket)

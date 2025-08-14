@@ -49,7 +49,7 @@ namespace Arrowgene.O2Jam.Server.Core
             _consumer.AddHandler(new CashHandle());
             _consumer.AddHandler(new Room1Handle());
             _consumer.AddHandler(new PingHandle());
-            _consumer.AddHandler(new DisconnectHandle(MainChannel)); // ÐÞ¸Ä
+            _consumer.AddHandler(new DisconnectHandle()); // ÐÞ¸Ä
             _consumer.AddHandler(new LobbyBackButton());
             _consumer.AddHandler(new RoomBackButtonHandle());
             _consumer.AddHandler(new InGameBackButton());
