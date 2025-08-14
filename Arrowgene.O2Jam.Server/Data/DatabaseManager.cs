@@ -8,23 +8,17 @@ namespace Arrowgene.O2Jam.Server.Data
 {
     public class DatabaseManager
     {
-        // This is a temporary solution to get a DbContext instance in a static class.
-        // A proper solution would involve refactoring to use dependency injection.
+        public static string ConnectionString { get; set; }
+
         private static O2JamDbContext CreateDbContext()
         {
-            // The path needs to go up from the server's bin/Debug/netstandard2.1 directory
-            // to the solution root, then into the main project folder.
-            // A more robust solution would be to have a shared configuration.
-            string basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"../../../../Arrowgene.O2Jam"));
-
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(basePath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
+            if (string.IsNullOrEmpty(ConnectionString))
+            {
+                throw new System.InvalidOperationException("DatabaseManager.ConnectionString must be set before use.");
+            }
 
             var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseSqlServer(ConnectionString);
 
             return new O2JamDbContext(optionsBuilder.Options);
         }
