@@ -21,7 +21,7 @@ namespace Arrowgene.O2Jam.Server
             var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            optionsBuilder.UseSqlite(connectionString);
+            optionsBuilder.UseSqlServer(connectionString);
 
             return new O2JamDbContext(optionsBuilder.Options);
         }

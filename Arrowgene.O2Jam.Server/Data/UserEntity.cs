@@ -1,21 +1,30 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// 命名空间现在正确地指向了 Server 项目内部的 Data 文件夹
 namespace Arrowgene.O2Jam.Server.Data
 {
-    [Table("Accounts")]
+    [Table("T_o2jam_userinfo")]
     public class UserEntity
     {
         [Key]
-        public int Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("USER_INDEX_ID")]
+        public int UserIndexId { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        [Column("USER_ID")]
+        public string UserId { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        [Column("USER_NICKNAME")]
+        public string UserNickname { get; set; }
 
-        public virtual PlayerEntity Player { get; set; }
+        [Required]
+        [Column("SEX")]
+        public string Sex { get; set; }
+
+        [Column("CREATE_TIME")]
+        public DateTime? CreateTime { get; set; }
     }
 }

@@ -6,23 +6,10 @@ namespace Arrowgene.O2Jam.Server.Data
     {
         public O2JamDbContext(DbContextOptions<O2JamDbContext> options) : base(options) { }
 
-        public DbSet<UserEntity> Accounts { get; set; }
-        public DbSet<PlayerEntity> Characters { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            // 显式配置表名
-            modelBuilder.Entity<UserEntity>(entity =>
-            {
-                entity.ToTable("Accounts");
-            });
-
-            modelBuilder.Entity<PlayerEntity>(entity =>
-            {
-                entity.ToTable("Characters");
-            });
-        }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<PlayerEntity> Players { get; set; }
+        public DbSet<ItemEntity> Items { get; set; }
+        public DbSet<MemberEntity> Members { get; set; }
+        public DbSet<CashEntity> Cashes { get; set; }
     }
 }

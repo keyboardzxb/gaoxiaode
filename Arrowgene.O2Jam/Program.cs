@@ -6,6 +6,8 @@ using Arrowgene.O2Jam.Server.Packet;
 using Arrowgene.Logging;
 using Arrowgene.O2Jam.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 // 命名空间保持您项目原样
 namespace Arrowgene.O2Jam
@@ -53,9 +55,14 @@ namespace Arrowgene.O2Jam
 
             if (args.Length == 0)
             {
-                // --- 您的数据库和NetServer启动逻辑，完全保持不变 ---
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json")
+                    .Build();
+
                 var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
-                optionsBuilder.UseSqlite("Data Source=o2jam.db");
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                optionsBuilder.UseSqlServer(connectionString);
 
                 using (var dbContext = new O2JamDbContext(optionsBuilder.Options))
                 {

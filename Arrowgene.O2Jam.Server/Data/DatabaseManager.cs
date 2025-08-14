@@ -1,189 +1,216 @@
-﻿// Arrowgene.O2Jam.Server/Data/DatabaseManager.cs (最终修正版)
-using Microsoft.Data.Sqlite;
-using System;
+using Arrowgene.O2Jam.Server.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.IO;
-using Arrowgene.O2Jam.Server.Common;
+using System.Linq;
 
 namespace Arrowgene.O2Jam.Server.Data
 {
     public class DatabaseManager
     {
-        private static readonly string DbPath = Path.Combine(Util.ExecutingDirectory(), "Data", "o2jam.db");
-        private static readonly string ConnectionString = $"Data Source={DbPath}";
-
-        public static void Initialize()
+        // This is a temporary solution to get a DbContext instance in a static class.
+        // A proper solution would involve refactoring to use dependency injection.
+        private static O2JamDbContext CreateDbContext()
         {
-            var dbDir = Path.GetDirectoryName(DbPath);
-            if (dbDir != null && !Directory.Exists(dbDir))
-            {
-                Directory.CreateDirectory(dbDir);
-            }
+            // The path needs to go up from the server's bin/Debug/netstandard2.1 directory
+            // to the solution root, then into the main project folder.
+            // A more robust solution would be to have a shared configuration.
+            string basePath = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"../../../../Arrowgene.O2Jam"));
 
-            if (!File.Exists(DbPath))
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(basePath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
+
+            return new O2JamDbContext(optionsBuilder.Options);
+        }
+
+        public static Account GetAccount(string username, string password)
+        {
+            using (var context = CreateDbContext())
             {
-                using (var connection = new SqliteConnection(ConnectionString))
+                // Find user in 'member' table by username and password
+                var member = context.Members
+                    .FirstOrDefault(m => m.UserId == username && m.Password == password);
+
+                if (member == null)
                 {
-                    connection.Open();
-
-                    // --- Accounts Table ---
-                    var createAccountsTableCmd = connection.CreateCommand();
-                    createAccountsTableCmd.CommandText = @"
-                        CREATE TABLE Accounts (
-                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            Username TEXT NOT NULL UNIQUE,
-                            Password TEXT NOT NULL
-                        );";
-                    createAccountsTableCmd.ExecuteNonQuery();
-
-                    // --- Characters Table ---
-                    var createCharactersTableCmd = connection.CreateCommand();
-                    createCharactersTableCmd.CommandText = @"
-                        CREATE TABLE Characters (
-                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            AccountId INTEGER NOT NULL UNIQUE,
-                            Name TEXT NOT NULL,
-                            Level INTEGER DEFAULT 1,
-                            Exp INTEGER DEFAULT 0,
-                            Gems INTEGER DEFAULT 0,         -- 'Gem' is a reserved keyword in some SQL variants, using 'Gems'
-                            Cash INTEGER DEFAULT 9999,      -- Added Cash field
-                            Gender INTEGER DEFAULT 1,       -- Added Gender field (1 for female based on reference)
-                            Instrument INTEGER DEFAULT 1429,
-                            Hat INTEGER DEFAULT 1431,
-                            Top INTEGER DEFAULT 1432,
-                            Bottom INTEGER DEFAULT 1433,
-                            Shoes INTEGER DEFAULT 1434,
-                            Glasses INTEGER DEFAULT 1481,
-                            Wing INTEGER DEFAULT 1343,
-                            HairAccessory INTEGER DEFAULT 1185,
-                            SetAccessory INTEGER DEFAULT 1541,
-                            Glove INTEGER DEFAULT 0,
-                            Necklace INTEGER DEFAULT 0,
-                            Earring INTEGER DEFAULT 0,
-                            Pet INTEGER DEFAULT 0,
-                            Props INTEGER DEFAULT 0,              -- Added Props field (소품)
-                            CostumeProps INTEGER DEFAULT 0,       -- Added Costume props field (의상소품)
-                            InstrumentProps INTEGER DEFAULT 0,    -- Added Musical instrument props field (악기소품)
-                            PenaltyCount INTEGER DEFAULT 98,    -- Added Penalty Count
-                            PenaltyLevel INTEGER DEFAULT 9,     -- Added Penalty Level
-                            FOREIGN KEY (AccountId) REFERENCES Accounts (Id)
-                        );";
-                    createCharactersTableCmd.ExecuteNonQuery();
+                    return null;
                 }
+
+                // Find corresponding user info
+                var user = context.Users
+                    .FirstOrDefault(u => u.UserIndexId == member.Id);
+
+                if (user == null)
+                {
+                    // This indicates data inconsistency, but we'll handle it gracefully.
+                    return null;
+                }
+
+                return new Account
+                {
+                    Id = user.UserIndexId,
+                    Username = user.UserId
+                };
             }
         }
 
         public static bool RegisterAccount(string username, string password)
         {
-            using (var connection = new SqliteConnection(ConnectionString))
+            using (var context = CreateDbContext())
             {
-                connection.Open();
-                var checkUserCmd = connection.CreateCommand();
-                checkUserCmd.CommandText = "SELECT COUNT(1) FROM Accounts WHERE Username = $username COLLATE NOCASE";
-                checkUserCmd.Parameters.AddWithValue("$username", username);
-                if (Convert.ToInt32(checkUserCmd.ExecuteScalar()) > 0) return false;
+                // 1. Check if user already exists in the member table
+                if (context.Members.Any(m => m.UserId == username))
+                {
+                    return false; // User already exists
+                }
 
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        var insertCmd = connection.CreateCommand();
-                        insertCmd.Transaction = transaction;
-                        insertCmd.CommandText = "INSERT INTO Accounts (Username, Password) VALUES ($username, $password)";
-                        insertCmd.Parameters.AddWithValue("$username", username);
-                        insertCmd.Parameters.AddWithValue("$password", password);
-                        insertCmd.ExecuteNonQuery();
+                        // 2. Create and save the new member to get an ID
+                        var newMember = new MemberEntity
+                        {
+                            UserId = username,
+                            UserNick = username, // Default nickname to username
+                            Password = password,
+                            Sex = true, // Default to male
+                            RegisterDate = System.DateTime.UtcNow,
+                            Id9you = "0", // Default value
+                            Vip = 0
+                        };
+                        context.Members.Add(newMember);
+                        context.SaveChanges(); // Save to generate the ID
 
-                        var getLastIdCmd = connection.CreateCommand();
-                        getLastIdCmd.Transaction = transaction;
-                        getLastIdCmd.CommandText = "SELECT last_insert_rowid()";
-                        long accountId = (long)getLastIdCmd.ExecuteScalar();
+                        long newId = newMember.Id;
 
-                        var createCharCmd = connection.CreateCommand();
-                        createCharCmd.Transaction = transaction;
-                        createCharCmd.CommandText = @"
-                            INSERT INTO Characters (AccountId, Name) 
-                            VALUES ($accountId, $characterName)";
-                        createCharCmd.Parameters.AddWithValue("$accountId", accountId);
-                        createCharCmd.Parameters.AddWithValue("$characterName", username);
-                        createCharCmd.ExecuteNonQuery();
+                        // 3. Create UserInfo
+                        var newUserInfo = new UserEntity
+                        {
+                            UserIndexId = (int)newId,
+                            UserId = username,
+                            UserNickname = username,
+                            Sex = "m", // Default to male
+                            CreateTime = System.DateTime.UtcNow
+                        };
+                        context.Users.Add(newUserInfo);
 
+                        // 4. Create Character Info
+                        var newPlayer = new PlayerEntity
+                        {
+                            UserIndexId = (int)newId,
+                            UserId = username,
+                            UserNickname = username,
+                            Sex = true, // Default to male
+                            Level = 1,
+                            Experience = 0,
+                            AdminLevel = 0,
+                            Battle = 0,
+                            Win = 0,
+                            Draw = 0,
+                            Lose = 0
+                        };
+                        context.Players.Add(newPlayer);
+
+                        // 5. Create Default Cash
+                        var newCash = new CashEntity
+                        {
+                            UserIndexId = (int)newId,
+                            Gem = 10000,
+                            Mcash = 1000,
+                            O2cash = 0,
+                            Musiccash = 0,
+                            Itemcash = 0
+                        };
+                        context.Cashes.Add(newCash);
+
+                        // 6. Create Default Items
+                        var newItems = new ItemEntity
+                        {
+                            UserIndexId = (int)newId,
+                            // Default items based on P_o2jam_create_user for male
+                            Equip2 = 7,   // Hair
+                            Equip6 = 79,  // Jacket
+                            Equip7 = 106, // Pants
+                            Equip12 = 35  // Face
+                        };
+                        context.Items.Add(newItems);
+
+                        // 7. Save all changes
+                        context.SaveChanges();
                         transaction.Commit();
                         return true;
                     }
-                    catch { transaction.Rollback(); return false; }
-                }
-            }
-        }
-
-        public static Account GetAccount(string username, string password)
-        {
-            using (var connection = new SqliteConnection(ConnectionString))
-            {
-                connection.Open();
-                var command = connection.CreateCommand();
-
-                // --- vvv 核心修正：移除了对密码的COLLATE NOCASE，进行精确比对 vvv ---
-                command.CommandText = "SELECT Id, Username FROM Accounts WHERE Username = $username COLLATE NOCASE AND Password = $password";
-                // --- ^^^ 核心修正结束 ^^^ ---
-
-                command.Parameters.AddWithValue("$username", username);
-                command.Parameters.AddWithValue("$password", password);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
+                    catch
                     {
-                        return new Account { Id = reader.GetInt32(0), Username = reader.GetString(1) };
+                        transaction.Rollback();
+                        return false;
                     }
                 }
             }
-            return null;
         }
 
         public static Character GetCharacterByAccountId(int accountId)
         {
-            using (var connection = new SqliteConnection(ConnectionString))
+            using (var context = CreateDbContext())
             {
-                connection.Open();
-                var command = connection.CreateCommand();
-                command.CommandText = "SELECT * FROM Characters WHERE AccountId = $accountId";
-                command.Parameters.AddWithValue("$accountId", accountId);
-
-                using (var reader = command.ExecuteReader())
+                var player = context.Players.Find(accountId);
+                if (player == null)
                 {
-                    if (reader.Read())
-                    {
-                        return new Character
-                        {
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Level = reader.GetInt32(reader.GetOrdinal("Level")),
-                            Exp = reader.GetInt32(reader.GetOrdinal("Exp")),
-                            Gems = reader.GetInt32(reader.GetOrdinal("Gems")),
-                            Cash = reader.GetInt32(reader.GetOrdinal("Cash")),
-                            Gender = reader.GetInt32(reader.GetOrdinal("Gender")),
-                            Instrument = reader.GetInt32(reader.GetOrdinal("Instrument")),
-                            Hat = reader.GetInt32(reader.GetOrdinal("Hat")),
-                            Top = reader.GetInt32(reader.GetOrdinal("Top")),
-                            Bottom = reader.GetInt32(reader.GetOrdinal("Bottom")),
-                            Shoes = reader.GetInt32(reader.GetOrdinal("Shoes")),
-                            Glasses = reader.GetInt32(reader.GetOrdinal("Glasses")),
-                            Wing = reader.GetInt32(reader.GetOrdinal("Wing")),
-                            HairAccessory = reader.GetInt32(reader.GetOrdinal("HairAccessory")),
-                            SetAccessory = reader.GetInt32(reader.GetOrdinal("SetAccessory")),
-                            Glove = reader.GetInt32(reader.GetOrdinal("Glove")),
-                            Necklace = reader.GetInt32(reader.GetOrdinal("Necklace")),
-                            Earring = reader.GetInt32(reader.GetOrdinal("Earring")),
-                            Pet = reader.GetInt32(reader.GetOrdinal("Pet")),
-                            Props = reader.GetInt32(reader.GetOrdinal("Props")),
-                            CostumeProps = reader.GetInt32(reader.GetOrdinal("CostumeProps")),
-                            InstrumentProps = reader.GetInt32(reader.GetOrdinal("InstrumentProps")),
-                            PenaltyCount = reader.GetInt32(reader.GetOrdinal("PenaltyCount")),
-                            PenaltyLevel = reader.GetInt32(reader.GetOrdinal("PenaltyLevel"))
-                        };
-                    }
+                    return null;
                 }
+
+                var items = context.Items.Find(accountId);
+                var cash = context.Cashes.Find(accountId);
+
+                // If items or cash are missing, we can still proceed with default values
+                // but the character will be incomplete.
+                if (items == null || cash == null)
+                {
+                    // Consider logging a warning here about incomplete character data.
+                }
+
+                return new Character
+                {
+                    Name = player.UserNickname,
+                    Level = player.Level,
+                    Exp = player.Experience,
+                    Gender = player.Sex ? 1 : 0, // Assuming true is male (1), false is female (0)
+
+                    // From CashEntity
+                    Gems = cash?.Gem ?? 0,
+                    Cash = cash?.Mcash ?? 0,
+
+                    // From ItemEntity (Equipped items)
+                    Instrument = items?.Equip1 ?? 0,
+                    Hat = items?.Equip2 ?? 0,
+                    Top = items?.Equip6 ?? 0,
+                    Bottom = items?.Equip7 ?? 0,
+                    Shoes = items?.Equip5 ?? 0, // Note: SQL had shoes before top/bottom, mapping to EQUIP5
+                    Glasses = items?.Equip4 ?? 0,
+                    Wing = items?.Equip11 ?? 0,
+                    HairAccessory = items?.Equip3 ?? 0,
+                    SetAccessory = items?.Equip10 ?? 0,
+                    Glove = items?.Equip8 ?? 0,
+                    Necklace = items?.Equip9 ?? 0,
+                    Earring = items?.Equip12 ?? 0, // Note: Mapped to Equip12, might need adjustment
+                    Pet = items?.Equip13 ?? 0,
+                    Props = items?.Equip14 ?? 0,
+                    CostumeProps = items?.Equip15 ?? 0,
+                    InstrumentProps = items?.Equip16 ?? 0,
+
+                    // These were in the old Character model but not in the new schema directly
+                    // They might be calculated or stored elsewhere. Defaulting to 0 for now.
+                    PenaltyCount = 0,
+                    PenaltyLevel = 0
+                };
             }
-            return null;
         }
     }
 }
