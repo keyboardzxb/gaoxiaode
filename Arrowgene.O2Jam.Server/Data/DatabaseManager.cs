@@ -27,9 +27,9 @@ namespace Arrowgene.O2Jam.Server.Data
         {
             using (var context = CreateDbContext())
             {
-                // Find user in 'member' table by username and password
+                // Find user in 'member' table by username and password, trimming whitespace from the CHAR columns
                 var member = context.Members
-                    .FirstOrDefault(m => m.UserId == username && m.Password == password);
+                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim() == password);
 
                 if (member == null)
                 {
