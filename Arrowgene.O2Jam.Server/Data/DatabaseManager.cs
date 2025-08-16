@@ -69,11 +69,19 @@ namespace Arrowgene.O2Jam.Server.Data
                     try
                     {
                         // 2. Create and save the new member to get an ID
+                        string hashedPassword;
+                        using (var md5 = System.Security.Cryptography.MD5.Create())
+                        {
+                            var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
+                            var hashBytes = md5.ComputeHash(inputBytes);
+                            hashedPassword = System.Convert.ToHexString(hashBytes).ToLower();
+                        }
+
                         var newMember = new MemberEntity
                         {
                             UserId = username,
                             UserNick = username, // Default nickname to username
-                            Password = password,
+                            Password = hashedPassword,
                             Sex = true, // Default to male
                             RegisterDate = System.DateTime.UtcNow,
                             Id9you = "0", // Default value
