@@ -121,7 +121,11 @@ namespace Arrowgene.O2Jam.Server.Data
                             };
                             context.Items.Add(newItems);
 
+                            // Allow explicit identity insert for T_o2jam_userinfo
+                            context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.T_o2jam_userinfo ON;");
                             context.SaveChanges();
+                            context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.T_o2jam_userinfo OFF;");
+
                             transaction.Commit();
 
                             // Set the user to the newly created user info
@@ -130,6 +134,8 @@ namespace Arrowgene.O2Jam.Server.Data
                         }
                         catch (System.Exception ex)
                         {
+                            // Ensure IDENTITY_INSERT is turned off in case of an error
+                            context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT dbo.T_o2jam_userinfo OFF;");
                             var errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                             Logger.Error($"Login Error: Failed to create missing data for '{username}'. Error: {errorMsg}");
                             transaction.Rollback();
