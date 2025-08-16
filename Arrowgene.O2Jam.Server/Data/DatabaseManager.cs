@@ -130,7 +130,8 @@ namespace Arrowgene.O2Jam.Server.Data
                         }
                         catch (System.Exception ex)
                         {
-                            Logger.Error($"Login Error: Failed to create missing data for '{username}'. Error: {ex.Message}");
+                            var errorMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                            Logger.Error($"Login Error: Failed to create missing data for '{username}'. Error: {errorMsg}");
                             transaction.Rollback();
                             // If we fail to create the data, we cannot log the user in.
                             return null;

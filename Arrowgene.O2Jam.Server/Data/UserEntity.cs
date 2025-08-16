@@ -8,7 +8,7 @@ namespace Arrowgene.O2Jam.Server.Data
     public class UserEntity
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("USER_INDEX_ID")]
         public int UserIndexId { get; set; }
 
