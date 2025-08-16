@@ -23,7 +23,36 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             Logger.Info($"Login attempt from game client: User='{username}'");
 
-            Account account = DatabaseManager.GetAccount(username, password);
+            Account account;
+            try
+            {
+                account = DatabaseManager.GetAccount(username, password);
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
+            {
+                Logger.Error("DATABASE CONNECTION FAILED. Please check your connection string in appsettings.json.");
+                Logger.Error("Verify the following:");
+                Logger.Error("  1. The server name/IP address is correct.");
+                Logger.Error("  2. The SQL Server instance is running.");
+                Logger.Error("  3. A firewall is not blocking port 1433 (or your custom SQL port).");
+                Logger.Error("  4. SQL Server is configured to allow remote connections.");
+                Logger.Error($"  Underlying error: {ex.Message}");
+                // Send a generic failure message to the client
+                IBuffer failureRes = new StreamBuffer();
+                failureRes.WriteInt32(1); // Generic login failure code
+                client.Send(failureRes.GetAllBytes(), PacketId.LoginRes);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"An unexpected error occurred during login for user '{username}': {ex.Message}");
+                // Send a generic failure message to the client
+                IBuffer failureRes = new StreamBuffer();
+                failureRes.WriteInt32(1); // Generic login failure code
+                client.Send(failureRes.GetAllBytes(), PacketId.LoginRes);
+                return;
+            }
+
             if (account == null)
             {
                 Logger.Info($"Login failed for user: '{username}'. Invalid credentials.");
