@@ -1,7 +1,9 @@
 using Arrowgene.Logging;
 using Arrowgene.O2Jam.Server.Core;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 
@@ -264,9 +266,49 @@ namespace Arrowgene.O2Jam.Server.Data
         {
             using (var context = CreateDbContext())
             {
-                // Execute the official stored procedure to load character stats and cash
-                var sql = "EXEC P_o2jam_load_char @UserIndexID={0}";
-                var spResult = context.Set<LoadCharSpDto>().FromSqlRaw(sql, accountId).ToList().FirstOrDefault();
+                LoadCharSpDto spResult = null;
+                var connection = context.Database.GetDbConnection();
+                try
+                {
+                    connection.Open();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "P_o2jam_load_char";
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.Parameters.Add(new SqlParameter("@UserIndexID", accountId));
+
+                        using (var reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                spResult = new LoadCharSpDto
+                                {
+                                    USER_INDEX_ID = reader.GetInt32(0),
+                                    USERID = reader.GetString(1),
+                                    USERNICKNAME = reader.GetString(2),
+                                    USERSEX = reader.GetBoolean(3),
+                                    USERGEM = reader.GetInt32(4),
+                                    USERCASH = reader.GetInt32(5),
+                                    USERO2CASH = reader.GetInt32(6),
+                                    USERLEVEL = reader.GetInt32(7),
+                                    USERBATTLE = reader.GetInt32(8),
+                                    USERWIN = reader.GetInt32(9),
+                                    USERDRAW = reader.GetInt32(10),
+                                    USERLOSE = reader.GetInt32(11),
+                                    USEREXP = reader.GetInt32(12),
+                                    ADMIN = reader.GetInt32(13),
+                                    MUSICCASH = reader.GetInt32(14),
+                                    ITEMCASH = reader.GetInt32(15),
+                                    GAMECOUNT = reader.GetInt32(16)
+                                };
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    connection.Close();
+                }
 
                 if (spResult == null)
                 {
@@ -274,18 +316,13 @@ namespace Arrowgene.O2Jam.Server.Data
                     return null;
                 }
 
-                // Separately, load the character's items
                 var items = context.Items.Find(accountId);
                 if (items == null)
                 {
-                    // This can happen if the on-the-fly creation failed at the item step.
-                    // To be safe, we can create a default ItemEntity here or return null.
-                    // For now, let's assume it should exist.
                     Logger.Error($"GetCharacterByAccountId Error: Could not find items for AccountId: {accountId}");
                     return null;
                 }
 
-                // Map the results from the Stored Procedure and the Item query to the Character object
                 return new Character
                 {
                     Name = spResult.USERNICKNAME,
@@ -294,8 +331,6 @@ namespace Arrowgene.O2Jam.Server.Data
                     Gender = spResult.USERSEX ? 1 : 0,
                     Gems = spResult.USERGEM,
                     Cash = spResult.USERCASH,
-
-                    // From ItemEntity (Equipped items)
                     Instrument = items.Equip1,
                     Hat = items.Equip2,
                     Top = items.Equip6,
@@ -307,13 +342,11 @@ namespace Arrowgene.O2Jam.Server.Data
                     SetAccessory = items.Equip10,
                     Glove = items.Equip8,
                     Necklace = items.Equip9,
-                    Earring = items.Equip12, // Face ID
+                    Earring = items.Equip12,
                     Pet = items.Equip13,
                     Props = items.Equip14,
                     CostumeProps = items.Equip15,
                     InstrumentProps = items.Equip16,
-
-                    // These are not returned by the SP, so we default them to 0.
                     PenaltyCount = 0,
                     PenaltyLevel = 0
                 };
