@@ -87,7 +87,7 @@ namespace Arrowgene.O2Jam.Server.Data
                                 UserId = usernameStr,
                                 UserNickname = usernickStr,
                                 Sex = member.Sex,
-                                Level = 1,
+                                Level = 0,
                                 Experience = 0,
                                 AdminLevel = 0,
                                 Battle = 0,
