@@ -55,9 +55,15 @@ namespace Arrowgene.O2Jam
 
                 var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
                 var connectionString = configuration.GetConnectionString("DefaultConnection");
-                Logger.Info($"Database Connection String: '{connectionString}'"); // Log the connection string
-                DatabaseManager.ConnectionString = connectionString; // Set the static property
-                optionsBuilder.UseSqlServer(connectionString);
+
+                // Programmatically ensure TrustServerCertificate is true to fix SSL connection issues.
+                var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
+                builder.TrustServerCertificate = true;
+                var robustConnectionString = builder.ConnectionString;
+
+                Logger.Info($"Database Connection String: '{robustConnectionString}'"); // Log the connection string
+                DatabaseManager.ConnectionString = robustConnectionString; // Set the static property
+                optionsBuilder.UseSqlServer(robustConnectionString);
 
                 Setting.PasswordHash = configuration["PasswordHash"];
 
