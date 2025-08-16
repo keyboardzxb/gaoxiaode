@@ -23,10 +23,20 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             Logger.Info($"Login attempt from game client: User='{username}'");
 
+            // Hash the password using MD5, as it's likely stored hashed in the database.
+            string hashedPassword;
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
+                var hashBytes = md5.ComputeHash(inputBytes);
+                hashedPassword = Convert.ToHexString(hashBytes).ToLower();
+            }
+            Logger.Info($"Hashed password (MD5): {hashedPassword}");
+
             Account account;
             try
             {
-                account = DatabaseManager.GetAccount(username, password);
+                account = DatabaseManager.GetAccount(username, hashedPassword);
             }
             catch (Microsoft.Data.SqlClient.SqlException ex)
             {
