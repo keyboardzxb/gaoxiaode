@@ -42,8 +42,81 @@ namespace Arrowgene.O2Jam.Server.Data
 
                 if (user == null)
                 {
-                    // This indicates data inconsistency, but we'll handle it gracefully.
-                    return null;
+                    // Data inconsistency: Member exists but UserInfo does not.
+                    // We will create the missing data on the fly.
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        try
+                        {
+                            long newId = member.Id;
+                            string usernameStr = member.UserId.Trim();
+                            string usernickStr = member.UserNick.Trim();
+
+                            // 1. Create UserInfo
+                            var newUserInfo = new UserEntity
+                            {
+                                UserIndexId = (int)newId,
+                                UserId = usernameStr,
+                                UserNickname = usernickStr,
+                                Sex = member.Sex ? "m" : "f",
+                                CreateTime = System.DateTime.UtcNow
+                            };
+                            context.Users.Add(newUserInfo);
+
+                            // 2. Create Character Info (PlayerEntity)
+                            var newPlayer = new PlayerEntity
+                            {
+                                UserIndexId = (int)newId,
+                                UserId = usernameStr,
+                                UserNickname = usernickStr,
+                                Sex = member.Sex,
+                                Level = 1,
+                                Experience = 0,
+                                AdminLevel = 0,
+                                Battle = 0,
+                                Win = 0,
+                                Draw = 0,
+                                Lose = 0
+                            };
+                            context.Players.Add(newPlayer);
+
+                            // 3. Create Default Cash
+                            var newCash = new CashEntity
+                            {
+                                UserIndexId = (int)newId,
+                                Gem = 10000,
+                                Mcash = 1000,
+                                O2cash = 0,
+                                Musiccash = 0,
+                                Itemcash = 0
+                            };
+                            context.Cashes.Add(newCash);
+
+                            // 4. Create Default Items
+                            var newItems = new ItemEntity
+                            {
+                                UserIndexId = (int)newId,
+                                // Default items based on P_o2jam_create_user for male/female
+                                Equip2 = member.Sex ? 7 : 4,   // Hair
+                                Equip6 = member.Sex ? 79 : 76,  // Jacket
+                                Equip7 = member.Sex ? 106 : 103, // Pants
+                                Equip12 = member.Sex ? 35 : 2   // Face
+                            };
+                            context.Items.Add(newItems);
+
+                            context.SaveChanges();
+                            transaction.Commit();
+
+                            // Set the user to the newly created user info
+                            user = newUserInfo;
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            // If we fail to create the data, we cannot log the user in.
+                            return null;
+                        }
+                    }
                 }
 
                 return new Account
