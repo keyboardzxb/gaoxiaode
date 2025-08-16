@@ -59,7 +59,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteInt32(character.CostumeProps);
             res.WriteInt32(character.Shoes);
 
-            res.WriteInt32(35); // val2, appears to be a static value from reference. Keep it for now.
+            res.WriteInt32(character.Earring); // This was hardcoded to 35. It should be the face ID, which is stored in Earring (Equip12).
 
             // Equipped Items Block 2 (5 items)
             res.WriteInt32(character.Wing);
