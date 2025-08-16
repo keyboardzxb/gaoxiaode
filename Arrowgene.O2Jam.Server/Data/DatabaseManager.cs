@@ -264,53 +264,56 @@ namespace Arrowgene.O2Jam.Server.Data
         {
             using (var context = CreateDbContext())
             {
-                var player = context.Players.Find(accountId);
-                if (player == null)
+                // Execute the official stored procedure to load character stats and cash
+                var sql = "EXEC P_o2jam_load_char @UserIndexID={0}";
+                var spResult = context.Set<LoadCharSpDto>().FromSqlRaw(sql, accountId).ToList().FirstOrDefault();
+
+                if (spResult == null)
                 {
+                    Logger.Error($"GetCharacterByAccountId Error: P_o2jam_load_char returned null for AccountId: {accountId}");
                     return null;
                 }
 
+                // Separately, load the character's items
                 var items = context.Items.Find(accountId);
-                var cash = context.Cashes.Find(accountId);
-
-                // If items or cash are missing, we can still proceed with default values
-                // but the character will be incomplete.
-                if (items == null || cash == null)
+                if (items == null)
                 {
-                    // Consider logging a warning here about incomplete character data.
+                    // This can happen if the on-the-fly creation failed at the item step.
+                    // To be safe, we can create a default ItemEntity here or return null.
+                    // For now, let's assume it should exist.
+                    Logger.Error($"GetCharacterByAccountId Error: Could not find items for AccountId: {accountId}");
+                    return null;
                 }
 
+                // Map the results from the Stored Procedure and the Item query to the Character object
                 return new Character
                 {
-                    Name = player.UserNickname,
-                    Level = player.Level,
-                    Exp = player.Experience,
-                    Gender = player.Sex ? 1 : 0, // Assuming true is male (1), false is female (0)
-
-                    // From CashEntity
-                    Gems = cash?.Gem ?? 0,
-                    Cash = cash?.Mcash ?? 0,
+                    Name = spResult.USERNICKNAME,
+                    Level = spResult.USERLEVEL,
+                    Exp = spResult.USEREXP,
+                    Gender = spResult.USERSEX ? 1 : 0,
+                    Gems = spResult.USERGEM,
+                    Cash = spResult.USERCASH,
 
                     // From ItemEntity (Equipped items)
-                    Instrument = items?.Equip1 ?? 0,
-                    Hat = items?.Equip2 ?? 0,
-                    Top = items?.Equip6 ?? 0,
-                    Bottom = items?.Equip7 ?? 0,
-                    Shoes = items?.Equip5 ?? 0, // Note: SQL had shoes before top/bottom, mapping to EQUIP5
-                    Glasses = items?.Equip4 ?? 0,
-                    Wing = items?.Equip11 ?? 0,
-                    HairAccessory = items?.Equip3 ?? 0,
-                    SetAccessory = items?.Equip10 ?? 0,
-                    Glove = items?.Equip8 ?? 0,
-                    Necklace = items?.Equip9 ?? 0,
-                    Earring = items?.Equip12 ?? 0, // Note: Mapped to Equip12, might need adjustment
-                    Pet = items?.Equip13 ?? 0,
-                    Props = items?.Equip14 ?? 0,
-                    CostumeProps = items?.Equip15 ?? 0,
-                    InstrumentProps = items?.Equip16 ?? 0,
+                    Instrument = items.Equip1,
+                    Hat = items.Equip2,
+                    Top = items.Equip6,
+                    Bottom = items.Equip7,
+                    Shoes = items.Equip5,
+                    Glasses = items.Equip4,
+                    Wing = items.Equip11,
+                    HairAccessory = items.Equip3,
+                    SetAccessory = items.Equip10,
+                    Glove = items.Equip8,
+                    Necklace = items.Equip9,
+                    Earring = items.Equip12, // Face ID
+                    Pet = items.Equip13,
+                    Props = items.Equip14,
+                    CostumeProps = items.Equip15,
+                    InstrumentProps = items.Equip16,
 
-                    // These were in the old Character model but not in the new schema directly
-                    // They might be calculated or stored elsewhere. Defaulting to 0 for now.
+                    // These are not returned by the SP, so we default them to 0.
                     PenaltyCount = 0,
                     PenaltyLevel = 0
                 };
