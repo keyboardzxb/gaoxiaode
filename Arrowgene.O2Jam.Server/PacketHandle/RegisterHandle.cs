@@ -10,6 +10,13 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
     public class RegisterHandle : PacketHandler
     {
         private static readonly ILogger Logger = LogProvider.Logger<Logger>(typeof(RegisterHandle));
+        private readonly Setting _setting;
+
+        public RegisterHandle(Setting setting)
+        {
+            _setting = setting;
+        }
+
         public override PacketId Id => PacketId.RegisterReq;
 
         public override void Handle(Client client, NetPacket packet)
@@ -32,7 +39,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             Logger.Info($"Registration attempt for user: '{username}' with password of length: {password.Length}");
 
-            bool success = DatabaseManager.RegisterAccount(username, password);
+            bool success = DatabaseManager.RegisterAccount(username, password, _setting);
 
             IBuffer res = new StreamBuffer();
             if (success)
