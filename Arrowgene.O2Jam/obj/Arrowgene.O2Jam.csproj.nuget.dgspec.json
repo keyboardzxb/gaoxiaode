@@ -1,40 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam\\Arrowgene.O2Jam.csproj": {}
+    "/app/Arrowgene.O2Jam/Arrowgene.O2Jam.csproj": {}
   },
   "projects": {
-    "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\Arrowgene.O2Jam.Server.csproj": {
+    "/app/Arrowgene.O2Jam.Server/Arrowgene.O2Jam.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\Arrowgene.O2Jam.Server.csproj",
+        "projectUniqueName": "/app/Arrowgene.O2Jam.Server/Arrowgene.O2Jam.Server.csproj",
         "projectName": "Arrowgene.O2Jam.Server",
-        "projectPath": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\Arrowgene.O2Jam.Server.csproj",
-        "packagesPath": "C:\\Users\\40565\\.nuget\\packages\\",
-        "outputPath": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\obj\\",
+        "projectPath": "/app/Arrowgene.O2Jam.Server/Arrowgene.O2Jam.Server.csproj",
+        "packagesPath": "/home/jules/.nuget/packages/",
+        "outputPath": "/app/Arrowgene.O2Jam.Server/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\DevExpress 23.1\\Components\\Offline Packages",
-          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\40565\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.1.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/jules/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "netstandard2.1"
+          "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\DevExpress 23.1\\Components\\System\\Components\\Packages": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "netstandard2.1": {
-            "targetAlias": "netstandard2.1",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -47,12 +37,11 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
+        }
       },
       "frameworks": {
-        "netstandard2.1": {
-          "targetAlias": "netstandard2.1",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "Arrowgene.Buffers": {
               "target": "Package",
@@ -62,27 +51,23 @@
               "target": "Package",
               "version": "[1.0.6, )"
             },
-            "Microsoft.Data.Sqlite": {
-              "target": "Package",
-              "version": "[9.0.8, )"
-            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[5.0.17, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[5.0.17, )"
+              "version": "[8.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.Sqlite": {
+            "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[5.0.17, )"
+              "version": "[8.0.0, )"
             },
             "Microsoft.Extensions.Configuration.Json": {
               "target": "Package",
-              "version": "[5.0.0, )"
+              "version": "[8.0.0, )"
             },
             "System.Net.Http": {
               "target": "Package",
@@ -90,92 +75,7 @@
             },
             "System.Text.Encoding.CodePages": {
               "target": "Package",
-              "version": "[5.0.0, )"
-            }
-          },
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "NETStandard.Library": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201\\RuntimeIdentifierGraph.json"
-        }
-      }
-    },
-    "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam\\Arrowgene.O2Jam.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam\\Arrowgene.O2Jam.csproj",
-        "projectName": "Arrowgene.O2Jam",
-        "projectPath": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam\\Arrowgene.O2Jam.csproj",
-        "packagesPath": "C:\\Users\\40565\\.nuget\\packages\\",
-        "outputPath": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files\\DevExpress 23.1\\Components\\Offline Packages",
-          "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\40565\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.1.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net8.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\DevExpress 23.1\\Components\\System\\Components\\Packages": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
-            "projectReferences": {
-              "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\Arrowgene.O2Jam.Server.csproj": {
-                "projectPath": "E:\\O2JAMzaisheng\\Arrowgene.O2Jam-develop\\Arrowgene.O2Jam.Server\\Arrowgene.O2Jam.Server.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
-      },
-      "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "dependencies": {
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[5.0.17, )"
-            },
-            "Microsoft.Extensions.Hosting": {
-              "target": "Package",
-              "version": "[9.0.8, )"
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -194,7 +94,89 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.413/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/Arrowgene.O2Jam/Arrowgene.O2Jam.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/Arrowgene.O2Jam/Arrowgene.O2Jam.csproj",
+        "projectName": "Arrowgene.O2Jam",
+        "projectPath": "/app/Arrowgene.O2Jam/Arrowgene.O2Jam.csproj",
+        "packagesPath": "/home/jules/.nuget/packages/",
+        "outputPath": "/app/Arrowgene.O2Jam/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/jules/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/Arrowgene.O2Jam.Server/Arrowgene.O2Jam.Server.csproj": {
+                "projectPath": "/app/Arrowgene.O2Jam.Server/Arrowgene.O2Jam.Server.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.413/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

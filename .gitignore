@@ -1,0 +1,83 @@
+# C#/.NET
+[Bb]in/
+[Oo]bj/
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+/shelf/
+
+# User-specific files
+*.DS_Store
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+[Bb]uild/
+bld/
+[Bb]ld/
+build-results/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Tt]est[-_][Rr]esult*/
+/TestResults
+
+# Visual Studio 2019 cache/options
+.vs/
+
+# Visual Studio Code cache/options
+.vscode/
+
+# Rider cache/options
+.idea/
+
+# Dotnet-suggest cache
+.dotnet-suggest.json
+
+# Paket dependency manager
+.paket/paket.exe
+paket-files/
+
+# F#
+.fake/
+
+# Mac
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Others
+/packages
+/src/packages
+/tools
+*.nupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.assets.json
+/artifacts
+/publish
+/dist
+/bin
+/obj
+/out
+/target
+
+# Secrets
+/appsettings.Development.json
+/secrets.json
+/secrets.env
+*.pem
+*.key

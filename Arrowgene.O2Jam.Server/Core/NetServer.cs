@@ -59,10 +59,6 @@ namespace Arrowgene.O2Jam.Server.Core
             _consumer.AddHandler(new InGameRanking());
             _consumer.AddHandler(new Resalt());
             _consumer.AddHandler(new LobbyChatHandle(this));
-            _consumer.AddHandler(new test());
-            _consumer.AddHandler(new test1());
-            _consumer.AddHandler(new test2());
-            _consumer.AddHandler(new test3());
 
             _server = new AsyncEventServer(
                 IPAddress.Any,
