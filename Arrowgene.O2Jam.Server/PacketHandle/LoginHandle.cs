@@ -11,6 +11,12 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
     public class LoginHandle : PacketHandler
     {
         private static readonly ILogger Logger = LogProvider.Logger<Logger>(typeof(LoginHandle));
+        private readonly Setting _setting;
+
+        public LoginHandle(Setting setting)
+        {
+            _setting = setting;
+        }
 
         public override PacketId Id => PacketId.LoginReq;
 
@@ -23,20 +29,26 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             Logger.Info($"Login attempt from game client: User='{username}'");
 
-            // Hash the password using MD5, as it's likely stored hashed in the database.
-            string hashedPassword;
-            using (var md5 = System.Security.Cryptography.MD5.Create())
+            string passwordForDb = password;
+            if (string.Equals(_setting.PasswordHash, "MD5", StringComparison.OrdinalIgnoreCase))
             {
-                var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
-                var hashBytes = md5.ComputeHash(inputBytes);
-                hashedPassword = Convert.ToHexString(hashBytes).ToLower();
+                using (var md5 = System.Security.Cryptography.MD5.Create())
+                {
+                    var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
+                    var hashBytes = md5.ComputeHash(inputBytes);
+                    passwordForDb = Convert.ToHexString(hashBytes).ToLower();
+                }
+                Logger.Info($"Password hashing is set to MD5. Hashed password: {passwordForDb}");
             }
-            Logger.Info($"Hashed password (MD5): {hashedPassword}");
+            else
+            {
+                Logger.Info("Password hashing is set to None. Using plain text password.");
+            }
 
             Account account;
             try
             {
-                account = DatabaseManager.GetAccount(username, hashedPassword);
+                account = DatabaseManager.GetAccount(username, passwordForDb);
             }
             catch (Microsoft.Data.SqlClient.SqlException ex)
             {

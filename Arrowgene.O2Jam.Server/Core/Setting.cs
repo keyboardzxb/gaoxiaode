@@ -18,6 +18,7 @@ namespace Arrowgene.O2Jam.Server.Core
         {
             ServerSetting = new AsyncEventSettings(setting.ServerSetting);
             DataPath = setting.DataPath;
+            PasswordHash = setting.PasswordHash;
         }
 
         [DataMember(Order = 0)]
@@ -25,5 +26,8 @@ namespace Arrowgene.O2Jam.Server.Core
 
         [DataMember(Order = 1)]
         public string DataPath { get; set; }
+
+        [DataMember(Order = 2)]
+        public string PasswordHash { get; set; }
     }
 }

@@ -58,6 +58,8 @@ namespace Arrowgene.O2Jam
                 DatabaseManager.ConnectionString = connectionString; // Set the static property
                 optionsBuilder.UseSqlServer(connectionString);
 
+                Setting.PasswordHash = configuration["PasswordHash"];
+
                 using (var dbContext = new O2JamDbContext(optionsBuilder.Options))
                 {
                     var netServer = new NetServer(Setting, dbContext);

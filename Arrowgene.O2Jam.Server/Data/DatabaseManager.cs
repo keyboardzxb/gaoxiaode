@@ -29,7 +29,7 @@ namespace Arrowgene.O2Jam.Server.Data
             {
                 // Find user in 'member' table by username and password, trimming whitespace from the CHAR columns
                 var member = context.Members
-                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim().ToLower() == password);
+                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim().ToLower() == password.ToLower());
 
                 if (member == null)
                 {
@@ -54,7 +54,7 @@ namespace Arrowgene.O2Jam.Server.Data
             }
         }
 
-        public static bool RegisterAccount(string username, string password)
+        public static bool RegisterAccount(string username, string password, Setting setting)
         {
             using (var context = CreateDbContext())
             {
@@ -69,19 +69,22 @@ namespace Arrowgene.O2Jam.Server.Data
                     try
                     {
                         // 2. Create and save the new member to get an ID
-                        string hashedPassword;
-                        using (var md5 = System.Security.Cryptography.MD5.Create())
+                        string passwordForDb = password;
+                        if (string.Equals(setting.PasswordHash, "MD5", System.StringComparison.OrdinalIgnoreCase))
                         {
-                            var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
-                            var hashBytes = md5.ComputeHash(inputBytes);
-                            hashedPassword = System.Convert.ToHexString(hashBytes).ToLower();
+                            using (var md5 = System.Security.Cryptography.MD5.Create())
+                            {
+                                var inputBytes = System.Text.Encoding.ASCII.GetBytes(password);
+                                var hashBytes = md5.ComputeHash(inputBytes);
+                                passwordForDb = System.Convert.ToHexString(hashBytes).ToLower();
+                            }
                         }
 
                         var newMember = new MemberEntity
                         {
                             UserId = username,
                             UserNick = username, // Default nickname to username
-                            Password = hashedPassword,
+                            Password = passwordForDb,
                             Sex = true, // Default to male
                             RegisterDate = System.DateTime.UtcNow,
                             Id9you = "0", // Default value
