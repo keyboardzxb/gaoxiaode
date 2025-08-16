@@ -1,3 +1,4 @@
+using Arrowgene.Logging;
 using Arrowgene.O2Jam.Server.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +9,7 @@ namespace Arrowgene.O2Jam.Server.Data
 {
     public class DatabaseManager
     {
+        private static readonly ILogger Logger = LogProvider.Logger<DatabaseManager>();
         public static string ConnectionString { get; set; }
 
         private static O2JamDbContext CreateDbContext()
@@ -27,14 +29,28 @@ namespace Arrowgene.O2Jam.Server.Data
         {
             using (var context = CreateDbContext())
             {
-                // Find user in 'member' table by username and password, trimming whitespace from the CHAR columns
+                // Step 1: Find user by username only.
                 var member = context.Members
-                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim().ToLower() == password.ToLower());
+                    .FirstOrDefault(m => m.UserId.Trim() == username);
 
+                // Step 2: If no user found, log it and return null.
                 if (member == null)
                 {
+                    Logger.Info($"Login Error: User '{username}' not found in the database.");
                     return null;
                 }
+
+                // Step 3: Log user details to prove database connection is working.
+                Logger.Info($"Login Info: User '{username}' found. Nick: '{member.UserNick.Trim()}', Registered: '{member.RegisterDate}'. Now checking password.");
+
+                // Step 4: Check password.
+                if (member.Password.Trim().ToLower() != password.ToLower())
+                {
+                    Logger.Info($"Login Error: Password mismatch for user '{username}'.");
+                    return null;
+                }
+
+                Logger.Info($"Login Info: Password correct for user '{username}'. Proceeding with login.");
 
                 // Find corresponding user info
                 var user = context.Users
@@ -44,6 +60,7 @@ namespace Arrowgene.O2Jam.Server.Data
                 {
                     // Data inconsistency: Member exists but UserInfo does not.
                     // We will create the missing data on the fly.
+                    Logger.Info($"Login Info: UserInfo for '{username}' not found. Creating it now.");
                     using (var transaction = context.Database.BeginTransaction())
                     {
                         try
@@ -109,9 +126,11 @@ namespace Arrowgene.O2Jam.Server.Data
 
                             // Set the user to the newly created user info
                             user = newUserInfo;
+                            Logger.Info($"Login Info: Successfully created missing data for '{username}'.");
                         }
-                        catch
+                        catch (System.Exception ex)
                         {
+                            Logger.Error($"Login Error: Failed to create missing data for '{username}'. Error: {ex.Message}");
                             transaction.Rollback();
                             // If we fail to create the data, we cannot log the user in.
                             return null;
