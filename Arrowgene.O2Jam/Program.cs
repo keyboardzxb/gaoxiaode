@@ -55,6 +55,7 @@ namespace Arrowgene.O2Jam
 
                 var optionsBuilder = new DbContextOptionsBuilder<O2JamDbContext>();
                 var connectionString = configuration.GetConnectionString("DefaultConnection");
+                Logger.Info($"Database Connection String: '{connectionString}'"); // Log the connection string
                 DatabaseManager.ConnectionString = connectionString; // Set the static property
                 optionsBuilder.UseSqlServer(connectionString);
 
