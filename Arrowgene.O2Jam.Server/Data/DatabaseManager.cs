@@ -27,13 +27,32 @@ namespace Arrowgene.O2Jam.Server.Data
         {
             using (var context = CreateDbContext())
             {
-                // Find user in 'member' table by username and password, trimming whitespace from the CHAR columns
-                var member = context.Members
-                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim().ToLower() == password.ToLower());
+                var logger = LogProvider.Logger<Logger>(typeof(DatabaseManager));
+                logger.Info($"[DIAGNOSTIC] Attempting to get account for username: '{username}'");
+                logger.Info($"[DIAGNOSTIC] Password received from client: '{password}'");
+
+                // Find user by username first for diagnostics
+                var member = context.Members.FirstOrDefault(m => m.UserId.Trim() == username);
 
                 if (member == null)
                 {
+                    logger.Error($"[DIAGNOSTIC] User not found. No record in Members table with UserId = '{username}'.");
                     return null;
+                }
+
+                logger.Info($"[DIAGNOSTIC] User found. DB UserId: '{member.UserId}', DB Password: '{member.Password}'.");
+
+                // Now, perform the password check
+                if (member.Password.Trim().ToLower() == password.ToLower())
+                {
+                    logger.Info("[DIAGNOSTIC] Password check PASSED.");
+                }
+                else
+                {
+                    logger.Error("[DIAGNOSTIC] Password check FAILED.");
+                    logger.Error($"[DIAGNOSTIC] DB Password (trimmed, lowercase): '{member.Password.Trim().ToLower()}'");
+                    logger.Error($"[DIAGNOSTIC] Client Password (lowercase): '{password.ToLower()}'");
+                    return null; // Return null because password doesn't match
                 }
 
                 // Find corresponding user info
