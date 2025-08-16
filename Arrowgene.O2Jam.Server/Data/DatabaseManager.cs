@@ -29,7 +29,7 @@ namespace Arrowgene.O2Jam.Server.Data
             {
                 // Find user in 'member' table by username and password, trimming whitespace from the CHAR columns
                 var member = context.Members
-                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim() == password);
+                    .FirstOrDefault(m => m.UserId.Trim() == username && m.Password.Trim().ToLower() == password);
 
                 if (member == null)
                 {
