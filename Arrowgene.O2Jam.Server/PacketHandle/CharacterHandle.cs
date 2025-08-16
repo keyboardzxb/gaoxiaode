@@ -35,7 +35,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteByte((byte)character.Gender); // Gender from DB
             res.WriteInt32(0); // Unknown field, keep as 0
             res.WriteInt32(0); // Unknown field, keep as 0
-            res.WriteInt32(character.Cash); // Cash Point from DB
+            res.WriteInt32(character.Gems); // Gem Point from DB
 
             // Player Stats
             res.WriteInt32(character.Level); // Level from DB
@@ -59,7 +59,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteInt32(character.CostumeProps);
             res.WriteInt32(character.Shoes);
 
-            res.WriteInt32(35); // val2, appears to be a static value from reference. Keep it for now.
+            res.WriteInt32(character.Earring); // This was hardcoded to 35. It should be the face ID, which is stored in Earring (Equip12).
 
             // Equipped Items Block 2 (5 items)
             res.WriteInt32(character.Wing);
