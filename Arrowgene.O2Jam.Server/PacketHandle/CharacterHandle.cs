@@ -35,7 +35,7 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             res.WriteByte((byte)character.Gender); // Gender from DB
             res.WriteInt32(0); // Unknown field, keep as 0
             res.WriteInt32(0); // Unknown field, keep as 0
-            res.WriteInt32(character.Cash); // Cash Point from DB
+            res.WriteInt32(character.Gems); // Gem Point from DB
 
             // Player Stats
             res.WriteInt32(character.Level); // Level from DB
