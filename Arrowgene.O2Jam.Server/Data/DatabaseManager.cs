@@ -1,4 +1,4 @@
-using Arrowgene.O2Jam.Server.Core;
+using Arrowgene.O2Jam.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.IO;

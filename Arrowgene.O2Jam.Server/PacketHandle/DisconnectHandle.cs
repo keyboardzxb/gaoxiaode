@@ -4,6 +4,7 @@ using Arrowgene.O2Jam.Server.Core;
 using Arrowgene.O2Jam.Server.Logging;
 using Arrowgene.O2Jam.Server.Packet;
 using Arrowgene.O2Jam.Server.State;
+using Arrowgene.O2Jam.Server.Models;
 
 namespace Arrowgene.O2Jam.Server.PacketHandle
 {
