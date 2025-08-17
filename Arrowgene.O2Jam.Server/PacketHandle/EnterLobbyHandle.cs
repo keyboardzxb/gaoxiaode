@@ -5,11 +5,11 @@ using Arrowgene.O2Jam.Server.Packet;
 namespace Arrowgene.O2Jam.Server.PacketHandle
 {
     // 这个新文件用于精确处理客户端进入大厅的 0x2819 请求
-    public class EnterLobbyHandle : IPacketHandler
+    public class EnterLobbyHandle : PacketHandler
     {
-        public PacketId Id => PacketId.EnterLobbyRequest; // 对应我们新增的 10265
+        public override PacketId Id => PacketId.EnterLobbyRequest; // 对应我们新增的 10265
 
-        public void Handle(Client client, NetPacket packet)
+        public override void Handle(Client client, NetPacket packet)
         {
             IBuffer buffer = new StreamBuffer();
 

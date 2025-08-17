@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Arrowgene.O2Jam.Server.Core;
 using Arrowgene.O2Jam.Server.Packet;
+using Arrowgene.O2Jam.Server.Models;
 
 
 

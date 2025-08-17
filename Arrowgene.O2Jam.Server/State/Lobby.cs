@@ -1,5 +1,6 @@
 ﻿// 文件路径: Arrowgene.O2Jam.Server/State/Lobby.cs
 using Arrowgene.O2Jam.Server.Core;
+using Arrowgene.O2Jam.Server.Models;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

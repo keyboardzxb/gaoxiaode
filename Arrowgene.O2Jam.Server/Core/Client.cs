@@ -5,6 +5,7 @@ using Arrowgene.O2Jam.Server.Packet;
 using Arrowgene.Logging;
 using Arrowgene.Networking.Tcp;
 using Arrowgene.O2Jam.Server.State;
+using Arrowgene.O2Jam.Server.Models;
 
 namespace Arrowgene.O2Jam.Server.Core
 {

@@ -7,7 +7,11 @@ using System.Text;
 using System.Threading;
 using System.Linq;
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic; // 需要引入Collections.Generic
+using Arrowgene.O2Jam.Server.Models;
+
+
+
 
 namespace Arrowgene.O2Jam.Server.Core
 {
@@ -62,13 +66,13 @@ namespace Arrowgene.O2Jam.Server.Core
 
             switch (request.Url.AbsolutePath.ToLower())
             {
-                case "/gamefind_new/gamefine_main.asp":
+                case "/gamefind/gamefine_main.asp":
                     responseString = HandleGameFindMain(request);
                     break;
-                case "/gamefind_new/gamefind_user_list.asp":
+                case "/gamefind/gamefind_user_list.asp":
                     responseString = HandleUserList(request);
                     break;
-                case "/gamefind_new/friend_list.asp":
+                case "/gamefind/friend_list.asp":
                     responseString = HandleFriendList(request);
                     break;
                 default:

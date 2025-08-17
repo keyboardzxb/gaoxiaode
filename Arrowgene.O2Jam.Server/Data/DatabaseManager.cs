@@ -1,3 +1,5 @@
+
+using Arrowgene.O2Jam.Server.Models;
 using Arrowgene.Logging;
 using Arrowgene.O2Jam.Server.Core;
 using Microsoft.Data.SqlClient;

@@ -50,8 +50,8 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
         public override void Handle(Client client, NetPacket packet)
         {
-           // SendUnlockPacket(client);
-          //  AnnounceAllRoomsTo(client);
+            SendUnlockPacket(client);
+            AnnounceAllRoomsTo(client);
         }
 
        /* public static void AnnounceAllRoomsTo(Client recipient)
