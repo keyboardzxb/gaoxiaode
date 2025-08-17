@@ -52,26 +52,26 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
             charRes.WriteInt32(0); // Unknown
             charRes.WriteByte(0);  // Unknown
 
-            // Equipped Items
-            charRes.WriteInt32(character.Instrument);
-            charRes.WriteInt32(character.Hat);
-            charRes.WriteInt32(character.Props);
-            charRes.WriteInt32(character.Glove);
-            charRes.WriteInt32(character.Necklace);
-            charRes.WriteInt32(character.Top);
-            charRes.WriteInt32(character.Bottom);
-            charRes.WriteInt32(character.Glasses);
-            charRes.WriteInt32(character.Earring);
-            charRes.WriteInt32(character.CostumeProps);
-            charRes.WriteInt32(character.Shoes);
-            charRes.WriteInt32(character.Earring); // Face ID
+            // Equipped Items - These must be Int16 (short) to match the DB schema
+            charRes.WriteInt16((short)character.Instrument);
+            charRes.WriteInt16((short)character.Hat);
+            charRes.WriteInt16((short)character.Props);
+            charRes.WriteInt16((short)character.Glove);
+            charRes.WriteInt16((short)character.Necklace);
+            charRes.WriteInt16((short)character.Top);
+            charRes.WriteInt16((short)character.Bottom);
+            charRes.WriteInt16((short)character.Glasses);
+            charRes.WriteInt16((short)character.Earring);
+            charRes.WriteInt16((short)character.CostumeProps);
+            charRes.WriteInt16((short)character.Shoes);
+            charRes.WriteInt16((short)character.Earring); // Face ID
 
             // Equipped Items Block 2
-            charRes.WriteInt32(character.Wing);
-            charRes.WriteInt32(character.InstrumentProps);
-            charRes.WriteInt32(character.Pet);
-            charRes.WriteInt32(character.HairAccessory);
-            charRes.WriteInt32(character.SetAccessory);
+            charRes.WriteInt16((short)character.Wing);
+            charRes.WriteInt16((short)character.InstrumentProps);
+            charRes.WriteInt16((short)character.Pet);
+            charRes.WriteInt16((short)character.HairAccessory);
+            charRes.WriteInt16((short)character.SetAccessory);
 
             // My Bag (Inventory)
             charRes.WriteInt32(1);
