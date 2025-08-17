@@ -57,75 +57,72 @@ namespace Arrowgene.O2Jam.Server.PacketHandle
 
             IBuffer res = new StreamBuffer();
 
-            // We will now build the response packet with safe, hardcoded values for diagnosis.
-
+            // Build the packet exactly matching the user's reference code.
             res.WriteInt32(0); // Status Code, 0 for success
-            res.WriteCString("TestUser"); // Character Name
-            res.WriteByte(1); // Gender (1=male)
-            res.WriteInt32(0); // Unknown field
-            res.WriteInt32(0); // Unknown field
-            res.WriteInt32(10000); // Gems
+            res.WriteCString(character.Name);
+            res.WriteByte((byte)character.Gender);
+            res.WriteInt32(0); // Unknown
+            res.WriteInt32(0); // Unknown
+            res.WriteInt32(character.Cash); // First currency field, as per reference
 
             // Player Stats
-            res.WriteInt32(1); // Level
-            res.WriteInt32(0); // Unknown field
-            res.WriteInt32(0); // Unknown field
-            res.WriteInt32(0); // Unknown field
-            res.WriteInt32(0); // Exp
-            res.WriteInt32(0); // Unknown field
-            res.WriteByte(0);  // Unknown field
+            res.WriteInt32(character.Level);
+            res.WriteInt32(0); // Unknown
+            res.WriteInt32(0); // Unknown
+            res.WriteInt32(0); // Unknown
+            res.WriteInt32(character.Exp);
+            res.WriteInt32(0); // Unknown
+            res.WriteByte(0);  // Unknown
 
-            // Equipped Items Block 1 (11 items) - Using default male items
-            res.WriteInt32(0);   // Instrument
-            res.WriteInt32(7);   // Hat (Hair)
-            res.WriteInt32(0);   // Props
-            res.WriteInt32(0);   // Glove
-            res.WriteInt32(0);   // Necklace
-            res.WriteInt32(79);  // Top
-            res.WriteInt32(106); // Bottom
-            res.WriteInt32(0);   // Glasses
-            res.WriteInt32(35);  // Earring (Face)
-            res.WriteInt32(0);   // CostumeProps
-            res.WriteInt32(0);   // Shoes
+            // Equipped Items Block 1 (11 items) - As Int32, per reference
+            res.WriteInt32(character.Instrument);
+            res.WriteInt32(character.Hat);
+            res.WriteInt32(character.Props);
+            res.WriteInt32(character.Glove);
+            res.WriteInt32(character.Necklace);
+            res.WriteInt32(character.Top);
+            res.WriteInt32(character.Bottom);
+            res.WriteInt32(character.Glasses);
+            res.WriteInt32(character.Earring);
+            res.WriteInt32(character.CostumeProps);
+            res.WriteInt32(character.Shoes);
 
-            res.WriteInt32(35); // val2, Face ID confirmation
+            res.WriteInt32(35); // Hardcoded value, as per reference
 
             // Equipped Items Block 2 (5 items)
-            res.WriteInt32(0); // Wing
-            res.WriteInt32(0); // InstrumentProps
-            res.WriteInt32(0); // Pet
-            res.WriteInt32(0); // HairAccessory
-            res.WriteInt32(0); // SetAccessory
+            res.WriteInt32(character.Wing);
+            res.WriteInt32(character.InstrumentProps);
+            res.WriteInt32(character.Pet);
+            res.WriteInt32(character.HairAccessory);
+            res.WriteInt32(character.SetAccessory);
 
             // My Bag (Inventory)
-            res.WriteInt32(1); // Item count + 1 for the empty space
-            res.WriteInt32(0); // The empty space item id
-
-            // Null terminator for Bag
-            res.WriteInt32(0); // null
+            res.WriteInt32(1);
+            res.WriteInt32(0);
+            res.WriteInt32(0);
 
             // Present box
-            res.WriteInt16(0); // Number of gifts
+            res.WriteInt16(0);
 
-            // Some static fields from reference file after present box
+            // Static fields
             res.WriteInt16(0);
             res.WriteInt32(0);
             res.WriteInt32(0);
 
-            // Second Cash Point value, seems to be a confirmation.
-            res.WriteInt32(1000); // MCash
+            // Second Cash Point value
+            res.WriteInt32(character.Cash); // Second currency field, as per reference
 
             // Item rings
-            res.WriteInt32(0); // Number of ring types owned
+            res.WriteInt32(0);
 
             // Penalty info
-            res.WriteInt16(0); // Penalty Count
-            res.WriteInt16(0); // Penalty Level
+            res.WriteInt16((short)character.PenaltyCount);
+            res.WriteInt16((short)character.PenaltyLevel);
 
             // Send the fully constructed packet to the client
             client.Send(res.GetAllBytes(), PacketId.CharacterRes);
 
-            Logger.Info($"Sent DIAGNOSTIC character data for '{character.Name}' to the client.");
+            Logger.Info($"Sent character data for '{character.Name}' to the client, following reference code.");
         }
     }
 }
