@@ -5,10 +5,13 @@ using Arrowgene.O2Jam.Server.State;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Linq; // 需要引入Linq
+using System.Linq;
 using System;
 using System.Collections.Generic; // 需要引入Collections.Generic
 using Arrowgene.O2Jam.Server.Models;
+
+
+
 
 namespace Arrowgene.O2Jam.Server.Core
 {
@@ -120,7 +123,9 @@ namespace Arrowgene.O2Jam.Server.Core
         // --- 核心修正：玩家列表处理 ---
         private string HandleUserList(HttpListenerRequest request)
         {
-            var clients = Lobby.GetAllClients();
+            var clients = Lobby.GetAllClients()
+                .Where(c => c.Account != null && c.Character != null)
+                .ToList();
 
             // 【修正点 1】当没有玩家时，同样返回空字符串
             if (!clients.Any())
